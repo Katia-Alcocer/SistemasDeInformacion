@@ -1,0 +1,61 @@
+# DEPENDENCIAS DE NODE
+node_modules/
+**/node_modules/
+
+# VARIABLES DE ENTORNO / SECRETOS
+.env
+.env.local
+.env.*.local
+
+!.env.example
+
+# LOGS
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ARCHIVOS GENERADOS POR VITE / FRONTEND
+frontend/dist/
+frontend/.vite/
+
+# ARCHIVOS GENERADOS POR BACKEND
+backend/dist/
+backend/build/
+
+# COBERTURA DE TESTS
+coverage/
+
+# SISTEMA OPERATIVO
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# EDITORES
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+.idea/
+
+# ARCHIVOS TEMPORALES
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# DATOS LOCALES DE MYSQL
+mysql_data/
+*.sql.gz
+*.dump
+*.bak
+*.sqlite
+*.sqlite3
+
+# ARCHIVOS DE DOCKER LOCALES
+docker-compose.override.yml
+docker-compose.local.yml
+package-lock.json
+Enlaces.txt
