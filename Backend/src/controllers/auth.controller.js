@@ -1,8 +1,39 @@
 import {
+    registerUser,
     loginUser,
     getAuthenticatedUser
 } from "../services/auth.service.js";
-import { loginSchema } from "../validators/auth.validator.js";
+import {
+    registerSchema,
+    loginSchema
+} from "../validators/auth.validator.js";
+
+export const register = async (req, res) => {
+    try {
+        const { error } = registerSchema.validate(req.body);
+
+        if (error) {
+            return res.status(400).json({
+                success: false,
+                message: error.details[0].message
+            });
+        }
+
+        const user = await registerUser(req.body);
+
+        return res.status(201).json({
+            success: true,
+            message: "Usuario registrado correctamente",
+            user
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
 
 export const login = async (req, res) => {
     try {

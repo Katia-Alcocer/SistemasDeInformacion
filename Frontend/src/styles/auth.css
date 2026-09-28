@@ -7,7 +7,8 @@ body {
     font-family: Arial, sans-serif;
 }
 
-.login-container {
+.login-container,
+.register-container {
     min-height: 100vh;
 
     display: flex;
@@ -17,8 +18,10 @@ body {
     background: #f4f6f8;
 }
 
-.login-card {
-    width: 400px;
+.login-card,
+.register-card {
+    width: 100%;
+    max-width: 450px;
     padding: 35px;
 
     background: white;
@@ -29,11 +32,13 @@ body {
         0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.login-card h1 {
+.login-card h1,
+.register-card h1 {
     margin-bottom: 5px;
 }
 
-.login-card p {
+.login-card p,
+.register-card p {
     color: #666;
 }
 
@@ -49,7 +54,8 @@ body {
     font-weight: 600;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
     width: 100%;
 
     padding: 12px;
@@ -60,12 +66,14 @@ body {
     font-size: 15px;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group select:focus {
     outline: none;
     border-color: #2563eb;
 }
 
-.login-card button {
+.login-card button,
+.register-card button {
     width: 100%;
 
     padding: 12px;
@@ -81,12 +89,14 @@ body {
     cursor: pointer;
 }
 
-.login-card button:disabled {
+.login-card button:disabled,
+.register-card button:disabled {
     opacity: 0.6;
     cursor: not-allowed;
 }
 
-.login-error {
+.login-error,
+.register-error {
     margin-bottom: 15px;
 
     padding: 10px;
@@ -95,4 +105,18 @@ body {
 
     background: #fee2e2;
     color: #b91c1c;
+}
+
+.form-link {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.form-link a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.form-link a:hover {
+    text-decoration: underline;
 }

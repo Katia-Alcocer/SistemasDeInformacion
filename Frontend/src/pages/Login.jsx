@@ -115,6 +115,10 @@ const Login = () => {
                         }
                     </button>
 
+                    <div className="form-link">
+                        <a href="/register">Crear una cuenta</a>
+                    </div>
+
                 </form>
 
             </div>

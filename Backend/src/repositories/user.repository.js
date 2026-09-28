@@ -26,6 +26,36 @@ export const findUserByEmail = async (correo) => {
     return rows[0] || null;
 };
 
+export const createUser = async ({
+    id_rol,
+    nombre,
+    apellido,
+    correo,
+    password,
+    telefono
+}) => {
+    const [result] = await pool.execute(
+        `
+        INSERT INTO usuarios
+        (
+            id_rol,
+            nombre,
+            apellido,
+            correo,
+            password,
+            telefono,
+            activo
+        )
+        VALUES (?, ?, ?, ?, ?, ?, TRUE)
+        `,
+        [id_rol, nombre, apellido, correo, password, telefono]
+    );
+
+    return {
+        insertId: result.insertId
+    };
+};
+
 export const findUserById = async (id_usuario) => {
     const [rows] = await pool.execute(
         `

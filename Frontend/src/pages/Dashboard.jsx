@@ -37,7 +37,11 @@ const Dashboard = () => {
                 Rol: {user?.rol}
             </p>
 
-            <button onClick={handleLogout}>
+            <button onClick={() => navigate("/users")}>
+                Gestionar usuarios
+            </button>
+
+            <button onClick={handleLogout} style={{ marginTop: "10px" }}>
                 Cerrar sesión
             </button>
 

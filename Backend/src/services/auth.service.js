@@ -1,9 +1,46 @@
 import bcrypt from "bcryptjs";
 import {
+    createUser,
     findUserByEmail,
     findUserById
 } from "../repositories/user.repository.js";
 import { generateToken } from "../utils/jwt.js";
+
+export const registerUser = async ({
+    nombre,
+    apellido,
+    correo,
+    password,
+    telefono,
+    id_rol
+}) => {
+    const userExists = await findUserByEmail(correo);
+
+    if (userExists) {
+        throw new Error("El correo ya está registrado");
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    const { insertId } = await createUser({
+        id_rol,
+        nombre,
+        apellido,
+        correo,
+        password: passwordHash,
+        telefono
+    });
+
+    return {
+        id_usuario: insertId,
+        nombre,
+        apellido,
+        correo,
+        telefono,
+        id_rol,
+        activo: true
+    };
+};
 
 export const loginUser = async (correo, password) => {
     const user = await findUserByEmail(correo);
