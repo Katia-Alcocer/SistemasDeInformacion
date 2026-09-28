@@ -34,10 +34,20 @@ services:
       - ./backend:/app
     ports:
       - "${BACKEND_PORT}:3000"
-    command: npm run dev
+    command: sh -c "npm install && npm run dev"
     depends_on:
       - mysql
     restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      FRONTEND_URL: ${FRONTEND_URL}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
+      NODE_ENV: ${NODE_ENV}
 
   frontend:
     image: node:24-slim
@@ -48,9 +58,12 @@ services:
       - /app/node_modules
     ports:
       - "${FRONTEND_PORT}:5173"
-    command: npm run dev -- --host 0.0.0.0
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     depends_on:
       - backend
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: ${VITE_API_URL}
 
 volumes:
   mysql_data:

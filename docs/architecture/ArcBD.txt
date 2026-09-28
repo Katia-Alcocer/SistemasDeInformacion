@@ -1,0 +1,39 @@
+                    ┌─────────────┐
+                    │    ROLES    │
+                    └──────┬──────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │  USUARIOS   │
+                    └──────┬──────┘
+                           │
+          ┌────────────────┼────────────────┐
+          │                │                │
+          ▼                ▼                ▼
+      COMPRAS           VENTAS       MOVIMIENTOS
+          │                │          INVENTARIO
+          ▼                ▼
+ DETALLE_COMPRAS    DETALLE_VENTAS
+          │                │
+          └───────┬────────┘
+                  │
+                  ▼
+              PRODUCTOS
+                  │
+                  ▼
+             INVENTARIO
+                  │
+                  ▼
+             CATEGORIAS
+
+
+ PROVEEDORES ────► COMPRAS
+
+
+ CLIENTES ───────► VENTAS
+    │
+    ▼
+ CREDITOS_CLIENTES
+    │
+    ▼
+ ABONOS_CREDITOS

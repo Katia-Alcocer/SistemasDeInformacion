@@ -1,37 +1,36 @@
+import dotenv from "dotenv";
 import app from "./app.js";
-import pool from "./config/database.js";
+import pool from "./config/db.js";
 
-const PORT = 3000;
+dotenv.config();
 
-async function waitForDatabase(maxAttempts = 20, delayMs = 2000) {
-    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-        try {
-            const connection = await pool.getConnection();
-            connection.release();
-            console.log("MySQL conectado correctamente");
-            return;
-        } catch (error) {
-            if (attempt === maxAttempts) {
-                throw error;
-            }
+const PORT = process.env.PORT || 3000;
 
-            console.log(`Esperando MySQL... intento ${attempt}/${maxAttempts}`);
-            await new Promise((resolve) => setTimeout(resolve, delayMs));
-        }
-    }
-}
+const startServer = async () => {
 
-async function startServer() {
     try {
-        await waitForDatabase();
+
+        const connection = await pool.getConnection();
+
+        console.log("✅ MySQL conectado");
+
+        connection.release();
 
         app.listen(PORT, () => {
-            console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+            console.log(
+                `🚀 Backend ejecutándose en http://localhost:${PORT}`
+            );
         });
+
     } catch (error) {
-        console.error("Error al conectar con MySQL:", error);
+
+        console.error(
+            "❌ Error conectando a MySQL:",
+            error.message
+        );
+
         process.exit(1);
     }
-}
+};
 
 startServer();

@@ -1,0 +1,676 @@
+
+USE mi_proyecto;
+
+
+-- ============================================================
+-- 1. TABLA: roles
+-- ============================================================
+
+CREATE TABLE roles (
+    id_rol INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL UNIQUE,
+    descripcion VARCHAR(255),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 2. TABLA: usuarios
+-- ============================================================
+
+CREATE TABLE usuarios (
+    id_usuario INT AUTO_INCREMENT PRIMARY KEY,
+    id_rol INT NOT NULL,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    correo VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    telefono VARCHAR(20),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_usuarios_roles
+        FOREIGN KEY (id_rol)
+        REFERENCES roles(id_rol)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 3. TABLA: categorias
+-- ============================================================
+
+CREATE TABLE categorias (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL UNIQUE,
+    descripcion VARCHAR(255),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 4. TABLA: proveedores
+-- ============================================================
+
+CREATE TABLE proveedores (
+    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(150) NOT NULL,
+    contacto VARCHAR(100),
+    telefono VARCHAR(20),
+    correo VARCHAR(150),
+    direccion VARCHAR(255),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 5. TABLA: clientes
+-- ============================================================
+
+CREATE TABLE clientes (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100),
+    telefono VARCHAR(20),
+    direccion VARCHAR(255),
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 6. TABLA: productos
+-- ============================================================
+
+CREATE TABLE productos (
+    id_producto INT AUTO_INCREMENT PRIMARY KEY,
+    id_categoria INT NOT NULL,
+
+    nombre VARCHAR(150) NOT NULL,
+    descripcion VARCHAR(255),
+
+    codigo_barras VARCHAR(50) UNIQUE,
+
+    precio_compra DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    precio_venta DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+
+    unidad_medida VARCHAR(30) NOT NULL DEFAULT 'pieza',
+
+    stock_minimo INT NOT NULL DEFAULT 0,
+
+    activo BOOLEAN NOT NULL DEFAULT TRUE,
+
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_producto_precio_compra
+        CHECK (precio_compra >= 0),
+
+    CONSTRAINT chk_producto_precio_venta
+        CHECK (precio_venta >= 0),
+
+    CONSTRAINT chk_producto_stock_minimo
+        CHECK (stock_minimo >= 0),
+
+    CONSTRAINT fk_productos_categorias
+        FOREIGN KEY (id_categoria)
+        REFERENCES categorias(id_categoria)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 7. TABLA: inventario
+-- ============================================================
+
+CREATE TABLE inventario (
+    id_inventario INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_producto INT NOT NULL UNIQUE,
+
+    existencia INT NOT NULL DEFAULT 0,
+
+    fecha_actualizacion DATETIME NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_inventario_existencia
+        CHECK (existencia >= 0),
+
+    CONSTRAINT fk_inventario_productos
+        FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 8. TABLA: compras
+-- ============================================================
+
+CREATE TABLE compras (
+    id_compra INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_proveedor INT NOT NULL,
+    id_usuario INT NOT NULL,
+
+    fecha_compra DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+
+    estado ENUM(
+        'RECIBIDA',
+        'CANCELADA'
+    ) NOT NULL DEFAULT 'RECIBIDA',
+
+    CONSTRAINT chk_compra_total
+        CHECK (total >= 0),
+
+    CONSTRAINT fk_compras_proveedores
+        FOREIGN KEY (id_proveedor)
+        REFERENCES proveedores(id_proveedor)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_compras_usuarios
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 9. TABLA: detalle_compras
+-- ============================================================
+
+CREATE TABLE detalle_compras (
+    id_detalle_compra INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_compra INT NOT NULL,
+    id_producto INT NOT NULL,
+
+    cantidad INT NOT NULL,
+
+    precio_unitario DECIMAL(10,2) NOT NULL,
+
+    subtotal DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT chk_detalle_compra_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT chk_detalle_compra_precio
+        CHECK (precio_unitario >= 0),
+
+    CONSTRAINT chk_detalle_compra_subtotal
+        CHECK (subtotal >= 0),
+
+    CONSTRAINT fk_detalle_compras_compra
+        FOREIGN KEY (id_compra)
+        REFERENCES compras(id_compra)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_detalle_compras_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 10. TABLA: ventas
+-- ============================================================
+
+CREATE TABLE ventas (
+    id_venta INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_cliente INT NULL,
+    id_usuario INT NOT NULL,
+
+    fecha_venta DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    tipo_pago ENUM(
+        'EFECTIVO',
+        'TARJETA',
+        'TRANSFERENCIA',
+        'FIADO'
+    ) NOT NULL,
+
+    total DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+
+    estado ENUM(
+        'COMPLETADA',
+        'CANCELADA'
+    ) NOT NULL DEFAULT 'COMPLETADA',
+
+    CONSTRAINT chk_venta_total
+        CHECK (total >= 0),
+
+    CONSTRAINT fk_ventas_clientes
+        FOREIGN KEY (id_cliente)
+        REFERENCES clientes(id_cliente)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_ventas_usuarios
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 11. TABLA: detalle_ventas
+-- ============================================================
+
+CREATE TABLE detalle_ventas (
+    id_detalle_venta INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_venta INT NOT NULL,
+    id_producto INT NOT NULL,
+
+    cantidad INT NOT NULL,
+
+    precio_unitario DECIMAL(10,2) NOT NULL,
+
+    subtotal DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT chk_detalle_venta_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT chk_detalle_venta_precio
+        CHECK (precio_unitario >= 0),
+
+    CONSTRAINT chk_detalle_venta_subtotal
+        CHECK (subtotal >= 0),
+
+    CONSTRAINT fk_detalle_ventas_venta
+        FOREIGN KEY (id_venta)
+        REFERENCES ventas(id_venta)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_detalle_ventas_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 12. TABLA: creditos_clientes
+-- ============================================================
+
+CREATE TABLE creditos_clientes (
+    id_credito INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_cliente INT NOT NULL,
+    id_venta INT NOT NULL UNIQUE,
+    id_usuario INT NOT NULL,
+
+    monto_original DECIMAL(10,2) NOT NULL,
+
+    fecha_credito DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    fecha_vencimiento DATE NULL,
+
+    estado ENUM(
+        'PENDIENTE',
+        'PAGADO',
+        'VENCIDO',
+        'CANCELADO'
+    ) NOT NULL DEFAULT 'PENDIENTE',
+
+    CONSTRAINT chk_credito_monto
+        CHECK (monto_original > 0),
+
+    CONSTRAINT fk_creditos_clientes
+        FOREIGN KEY (id_cliente)
+        REFERENCES clientes(id_cliente)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_creditos_ventas
+        FOREIGN KEY (id_venta)
+        REFERENCES ventas(id_venta)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_creditos_usuarios
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 13. TABLA: abonos_creditos
+-- ============================================================
+
+CREATE TABLE abonos_creditos (
+    id_abono INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_credito INT NOT NULL,
+    id_usuario INT NOT NULL,
+
+    monto DECIMAL(10,2) NOT NULL,
+
+    fecha_abono DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    metodo_pago ENUM(
+        'EFECTIVO',
+        'TARJETA',
+        'TRANSFERENCIA'
+    ) NOT NULL DEFAULT 'EFECTIVO',
+
+    observaciones VARCHAR(255),
+
+    CONSTRAINT chk_abono_monto
+        CHECK (monto > 0),
+
+    CONSTRAINT fk_abonos_creditos
+        FOREIGN KEY (id_credito)
+        REFERENCES creditos_clientes(id_credito)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_abonos_usuarios
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- 14. TABLA: movimientos_inventario
+-- ============================================================
+
+CREATE TABLE movimientos_inventario (
+    id_movimiento INT AUTO_INCREMENT PRIMARY KEY,
+
+    id_producto INT NOT NULL,
+    id_usuario INT NOT NULL,
+
+    id_compra INT NULL,
+    id_venta INT NULL,
+
+    tipo_movimiento ENUM(
+        'ENTRADA',
+        'SALIDA',
+        'AJUSTE',
+        'DEVOLUCION'
+    ) NOT NULL,
+
+    cantidad INT NOT NULL,
+
+    existencia_anterior INT NOT NULL,
+    existencia_nueva INT NOT NULL,
+
+    motivo VARCHAR(255),
+
+    fecha_movimiento DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_movimiento_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT chk_movimiento_existencia_anterior
+        CHECK (existencia_anterior >= 0),
+
+    CONSTRAINT chk_movimiento_existencia_nueva
+        CHECK (existencia_nueva >= 0),
+
+    CONSTRAINT fk_movimientos_producto
+        FOREIGN KEY (id_producto)
+        REFERENCES productos(id_producto)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_movimientos_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuarios(id_usuario)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_movimientos_compra
+        FOREIGN KEY (id_compra)
+        REFERENCES compras(id_compra)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+
+    CONSTRAINT fk_movimientos_venta
+        FOREIGN KEY (id_venta)
+        REFERENCES ventas(id_venta)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT
+) ENGINE=InnoDB;
+
+
+-- ============================================================
+-- ÍNDICES
+-- ============================================================
+
+CREATE INDEX idx_productos_categoria
+    ON productos(id_categoria);
+
+CREATE INDEX idx_productos_nombre
+    ON productos(nombre);
+
+CREATE INDEX idx_compras_proveedor
+    ON compras(id_proveedor);
+
+CREATE INDEX idx_compras_fecha
+    ON compras(fecha_compra);
+
+CREATE INDEX idx_ventas_cliente
+    ON ventas(id_cliente);
+
+CREATE INDEX idx_ventas_fecha
+    ON ventas(fecha_venta);
+
+CREATE INDEX idx_ventas_usuario
+    ON ventas(id_usuario);
+
+CREATE INDEX idx_detalle_ventas_producto
+    ON detalle_ventas(id_producto);
+
+CREATE INDEX idx_detalle_compras_producto
+    ON detalle_compras(id_producto);
+
+CREATE INDEX idx_creditos_cliente
+    ON creditos_clientes(id_cliente);
+
+CREATE INDEX idx_creditos_estado
+    ON creditos_clientes(estado);
+
+CREATE INDEX idx_creditos_vencimiento
+    ON creditos_clientes(fecha_vencimiento);
+
+CREATE INDEX idx_abonos_credito
+    ON abonos_creditos(id_credito);
+
+CREATE INDEX idx_abonos_fecha
+    ON abonos_creditos(fecha_abono);
+
+CREATE INDEX idx_movimientos_producto
+    ON movimientos_inventario(id_producto);
+
+CREATE INDEX idx_movimientos_fecha
+    ON movimientos_inventario(fecha_movimiento);
+
+CREATE INDEX idx_movimientos_compra
+    ON movimientos_inventario(id_compra);
+
+CREATE INDEX idx_movimientos_venta
+    ON movimientos_inventario(id_venta);
+
+
+-- ============================================================
+-- DATOS INICIALES
+-- ============================================================
+
+-- ROLES
+
+INSERT INTO roles
+    (nombre, descripcion)
+VALUES
+    ('Administrador', 'Acceso completo al sistema'),
+    ('Cajero', 'Realiza ventas y registra pagos'),
+    ('Almacen', 'Gestiona productos e inventario');
+
+
+-- CATEGORÍAS
+
+INSERT INTO categorias
+    (nombre, descripcion)
+VALUES
+    ('Abarrotes', 'Productos básicos de despensa'),
+    ('Bebidas', 'Refrescos, agua y otras bebidas'),
+    ('Botanas', 'Papas, frituras y botanas'),
+    ('Lácteos', 'Leche, queso, yogurt y derivados'),
+    ('Limpieza', 'Productos para limpieza del hogar'),
+    ('Panadería', 'Pan y productos de panadería'),
+    ('Higiene personal', 'Productos de higiene personal');
+
+
+-- CLIENTES DE EJEMPLO
+
+INSERT INTO clientes
+    (nombre, apellido, telefono)
+VALUES
+    ('Juan', 'Pérez', '4610000001'),
+    ('María', 'García', '4610000002');
+
+
+-- PROVEEDORES DE EJEMPLO
+
+INSERT INTO proveedores
+    (nombre, contacto, telefono, correo)
+VALUES
+    (
+        'Distribuidora La Central',
+        'Carlos López',
+        '4611000001',
+        'contacto@distribuidora.com'
+    ),
+    (
+        'Abarrotera del Centro',
+        'Ana Martínez',
+        '4611000002',
+        'ventas@abarrotera.com'
+    );
+
+
+-- ============================================================
+-- PRODUCTOS DE EJEMPLO
+-- ============================================================
+
+INSERT INTO productos
+    (
+        id_categoria,
+        nombre,
+        descripcion,
+        codigo_barras,
+        precio_compra,
+        precio_venta,
+        unidad_medida,
+        stock_minimo
+    )
+VALUES
+    (
+        2,
+        'Coca-Cola 600 ml',
+        'Refresco de cola de 600 ml',
+        '7501055300011',
+        12.00,
+        18.00,
+        'pieza',
+        10
+    ),
+    (
+        2,
+        'Agua embotellada 1 L',
+        'Agua purificada de 1 litro',
+        '7501055300012',
+        7.00,
+        12.00,
+        'pieza',
+        10
+    ),
+    (
+        3,
+        'Papas clásicas 45 g',
+        'Botana de papa',
+        '7501055300013',
+        10.00,
+        15.00,
+        'pieza',
+        10
+    ),
+    (
+        4,
+        'Leche entera 1 L',
+        'Leche entera',
+        '7501055300014',
+        20.00,
+        27.00,
+        'pieza',
+        5
+    ),
+    (
+        1,
+        'Arroz 1 kg',
+        'Arroz blanco de 1 kilogramo',
+        '7501055300015',
+        22.00,
+        30.00,
+        'pieza',
+        5
+    ),
+    (
+        1,
+        'Frijol 1 kg',
+        'Frijol negro de 1 kilogramo',
+        '7501055300016',
+        25.00,
+        34.00,
+        'pieza',
+        5
+    ),
+    (
+        5,
+        'Detergente 1 L',
+        'Detergente líquido',
+        '7501055300017',
+        25.00,
+        35.00,
+        'pieza',
+        5
+    );
+
+
+-- ============================================================
+-- CREAR INVENTARIO INICIAL PARA LOS PRODUCTOS
+-- ============================================================
+
+INSERT INTO inventario
+    (id_producto, existencia)
+SELECT
+    id_producto,
+    0
+FROM productos;
+
+
+-- ============================================================
+-- FIN DEL SCRIPT
+-- ============================================================

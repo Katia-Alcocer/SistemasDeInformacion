@@ -1,15 +1,36 @@
 import express from "express";
 import cors from "cors";
+import cookieParser from "cookie-parser";
+import dotenv from "dotenv";
+
+import authRoutes from "./routes/auth.routes.js";
+
+dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(
+    cors({
+        origin: process.env.FRONTEND_URL,
+        credentials: true
+    })
+);
+
 app.use(express.json());
 
-app.get("/", (req, res) => {
+app.use(express.urlencoded({
+    extended: true
+}));
+
+app.use(cookieParser());
+
+app.get("/api/test", (req, res) => {
     res.json({
-        mensaje: "API funcionando correctamente"
+        success: true,
+        message: "Backend funcionando correctamente"
     });
 });
+
+app.use("/api/auth", authRoutes);
 
 export default app;

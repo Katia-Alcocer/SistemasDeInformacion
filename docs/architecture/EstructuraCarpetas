@@ -1,0 +1,52 @@
+PROYECTO/
+│
+├── frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── assets/
+│   │   ├── components/
+│   │   ├── features/
+│   │   ├── pages/
+│   │   ├── routes/
+│   │   ├── services/
+│   │   ├── hooks/
+│   │   ├── context/
+│   │   ├── utils/
+│   │   ├── constants/
+│   │   ├── styles/
+│   │   ├── App.jsx
+│   │   └── main.jsx
+│   ├── .env
+│   └── package.json
+│
+├── backend/
+│   ├── src/
+│   │   ├── config/
+│   │   ├── routes/
+│   │   ├── controllers/
+│   │   ├── services/
+│   │   ├── repositories/
+│   │   ├── models/
+│   │   ├── middlewares/
+│   │   ├── validators/
+│   │   ├── utils/
+│   │   ├── errors/
+│   │   ├── constants/
+│   │   ├── docs/
+│   │   ├── app.js
+│   │   └── server.js
+│   ├── tests/
+│   ├── uploads/
+│   ├── .env
+│   └── package.json
+│
+├── docs/
+│   ├── architecture/
+│   ├── database/
+│   ├── api/
+│   └── diagrams/
+│
+├── .gitignore
+├── .env.example
+├── docker-compose.yml
+└── README.md
